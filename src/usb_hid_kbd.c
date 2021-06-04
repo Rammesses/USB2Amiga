@@ -77,6 +77,17 @@ static inline void process_kbd_report(hid_keyboard_report_t const *p_new_report)
     prev_report = *p_new_report;
 }
 
+void usb_hid_kbd_task(void) {
+    uint8_t const addr = 1;
+
+    if (tuh_hid_keyboard_is_mounted(addr)) {
+        if (!tuh_hid_keyboard_is_busy(addr)) {
+            process_kbd_report(&usb_keyboard_report);
+            tuh_hid_keyboard_get_report(addr, &usb_keyboard_report);
+        }
+    }
+}
+
 void tuh_hid_keyboard_mounted_cb(uint8_t dev_addr) {
     // application set-up
     printf("A Keyboard device (address %d) is mounted\r\n", dev_addr);

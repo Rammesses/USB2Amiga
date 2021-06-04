@@ -63,7 +63,7 @@ void cursor_movement(int8_t x, int8_t y, int8_t wheel) {
     }
 }
 
-static inline void process_mouse_report(hid_mouse_report_t const *p_report) {
+void process_mouse_report(hid_mouse_report_t const *p_report) {
     static hid_mouse_report_t prev_report = {0};
 
     //------------- button state  -------------//
@@ -79,6 +79,16 @@ static inline void process_mouse_report(hid_mouse_report_t const *p_report) {
     cursor_movement(p_report->x, p_report->y, p_report->wheel);
 }
 
+void usb_hid_mouse_task(void) {
+    uint8_t const addr = 1;
+
+    if (tuh_hid_mouse_is_mounted(addr)) {
+        if (!tuh_hid_mouse_is_busy(addr)) {
+            process_mouse_report(&usb_mouse_report);
+            tuh_hid_mouse_get_report(addr, &usb_mouse_report);
+        }
+    }
+}
 
 void tuh_hid_mouse_mounted_cb(uint8_t dev_addr) {
     // application set-up

@@ -23,6 +23,8 @@
  *
  */
 
+#include "ami_mouse.h"
+
 void ami_mouse_init(int *p_mouse_events)
 {
 

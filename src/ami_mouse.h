@@ -23,14 +23,19 @@
  *
  */
 
-#include "ami_kbd.h"
+#ifndef _AMI_MOUSE_H_
+#define _AMI_MOUSE_H_
 
-void ami_kbd_init(int *p_kbd_events)
-{
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
-}
+void ami_mouse_init(int *p_kbd_events);
 
-void ami_kbd_out_task(void)
-{
+void ami_mouse_out_task(void);
 
-}
+#ifdef __cplusplus
+ }
+#endif
+
+#endif /* _AMI_MOUSE_H_ */

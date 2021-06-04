@@ -23,14 +23,17 @@
  *
  */
 
-#include "ami_kbd.h"
+#ifndef _USB_HID_MOUSE_H_
+#define _USB_HID_MOUSE_H_
 
-void ami_kbd_init(int *p_kbd_events)
-{
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
-}
+void usb_hid_mouse_task(void);
 
-void ami_kbd_out_task(void)
-{
+#ifdef __cplusplus
+ }
+#endif
 
-}
+#endif /* _USB_HID_MOUSE_H_ */

@@ -28,18 +28,19 @@
 #include <string.h>
 
 #include "bsp/board.h"
-#include "tusb.h"
 #include "pico/multicore.h"
+#include "tusb.h"
+
+#include "ami_kbd.h"
+#include "ami_mouse.h"
+#include "usb_hid_kbd.h"
+#include "usb_hid_mouse.h"
 
 void print_greeting(void);
 void led_blinking_task(void);
 extern void hid_task(void);
 
-extern void ami_mouse_init(*p_mouse_events)
-extern void ami_mouse_out_task(void);
-
-extern void ami_kbd_init(*p_kbd_events);
-extern void ami_kbd_out_task(void);
+static int p_kbd_events;
 
 int main(void) {
     board_init();
@@ -47,37 +48,21 @@ int main(void) {
 
     tusb_init();
 
-    ami_kbd_init()
+    ami_kbd_init(&p_kbd_events);
+
     multicore_launch_core1(ami_mouse_out_task);
-    multicore_launch_core2(ami_kbd_out_task);
+    multicore_launch_core1(ami_kbd_out_task);
 
     while (1) {
         // tinyusb host task
         tuh_task();
         led_blinking_task();
-        hid_task();
+        usb_hid_kbd_task();
+        usb_hid_mouse_task();
     }
 
     return 0;
 }
-
-void hid_task(void) {
-    uint8_t const addr = 1;
-
-    if (tuh_hid_keyboard_is_mounted(addr)) {
-        if (!tuh_hid_keyboard_is_busy(addr)) {
-            process_kbd_report(&usb_keyboard_report);
-            tuh_hid_keyboard_get_report(addr, &usb_keyboard_report);
-        }
-    }
-    if (tuh_hid_mouse_is_mounted(addr)) {
-        if (!tuh_hid_mouse_is_busy(addr)) {
-            process_mouse_report(&usb_mouse_report);
-            tuh_hid_mouse_get_report(addr, &usb_mouse_report);
-        }
-    }
-}
-
 
 void led_blinking_task(void) {
     const uint32_t interval_ms = 250;
