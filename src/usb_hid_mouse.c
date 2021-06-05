@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "tusb.h"
+#include "bsp/ansi_escape.h"
 
 //--------------------------------------------------------------------+
 // USB HID - Mouse
