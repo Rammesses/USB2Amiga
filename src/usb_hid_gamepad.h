@@ -23,13 +23,17 @@
  *
  */
 
-#include "ami_mouse.h"
+#ifndef _USB_HID_GAMEPAD_H_
+#define _USB_HID_GAMEPAD_H_
 
-void ami_mouse_init(int *p_mouse_events)
-{
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
-}
+void usb_hid_gamepad_task(void);
 
-void ami_mouse_out_task(void)
-{    
-}
+#ifdef __cplusplus
+ }
+#endif
+
+#endif /* _USB_HID_GAMEPAD_H_ */

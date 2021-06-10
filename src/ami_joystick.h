@@ -23,13 +23,19 @@
  *
  */
 
-#include "ami_mouse.h"
+#ifndef _AMI_JOYSTICK_H_
+#define _AMI_JOYSTICK_H_
 
-void ami_mouse_init(int *p_mouse_events)
-{
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
-}
+void ami_joystick_init(int *p_joystick_events);
 
-void ami_mouse_out_task(void)
-{    
-}
+void ami_joystick_out_task(void);
+
+#ifdef __cplusplus
+ }
+#endif
+
+#endif /* _AMI_JOYSTICK_H_ */

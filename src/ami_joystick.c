@@ -23,13 +23,13 @@
  *
  */
 
-#include "ami_mouse.h"
+#include "ami_joystick.h"
 
-void ami_mouse_init(int *p_mouse_events)
+void ami_joystick_init(int *p_joystick_events)
 {
 
 }
 
-void ami_mouse_out_task(void)
+void ami_joystick_out_task(void)
 {    
 }

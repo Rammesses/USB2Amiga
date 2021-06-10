@@ -31,16 +31,23 @@
 #include "pico/multicore.h"
 #include "tusb.h"
 
+#include "ami_joystick.h"
 #include "ami_kbd.h"
 #include "ami_mouse.h"
+#include "usb_hid_gamepad.h"
 #include "usb_hid_kbd.h"
 #include "usb_hid_mouse.h"
 
 void print_greeting(void);
 void led_blinking_task(void);
+void core0_input_loop(void);
+void core1_output_loop(void);
+
 extern void hid_task(void);
 
+static int p_joystick_events;
 static int p_kbd_events;
+static int p_mouse_events;
 
 int main(void) {
     board_init();
@@ -48,20 +55,49 @@ int main(void) {
 
     tusb_init();
 
+    ami_joystick_init(&p_joystick_events);
     ami_kbd_init(&p_kbd_events);
+    ami_kbd_init(&p_mouse_events);
 
-    multicore_launch_core1(ami_mouse_out_task);
-    multicore_launch_core1(ami_kbd_out_task);
+    // start our two loop processes
+    multicore_launch_core1(core1_output_loop);
+    core0_input_loop();
 
+    return 0;
+}
+
+void core0_input_loop(void)
+{
     while (1) {
         // tinyusb host task
         tuh_task();
-        led_blinking_task();
-        usb_hid_kbd_task();
-        usb_hid_mouse_task();
-    }
 
-    return 0;
+        // keyboard event handling
+        usb_hid_kbd_task();
+
+        // mouse event handling
+        usb_hid_mouse_task();
+
+        // gamepad / joystick handling
+        usb_hid_gamepad_task();
+    }
+}
+
+void core1_output_loop(void)
+{
+    while (1) {
+        // keyboard event handling
+        ami_kbd_out_task();
+
+        // mouse event handling
+        ami_mouse_out_task();
+
+        // gamepad / joystick handling
+        ami_joystick_out_task();
+
+        // watchdog blink         
+        led_blinking_task();
+    }
 }
 
 void led_blinking_task(void) {
@@ -82,4 +118,5 @@ void print_greeting(void) {
     printf("This Host demo is configured to support:\n");
     if (CFG_TUH_HID_KEYBOARD) puts("  - HID Keyboard");
     if (CFG_TUH_HID_MOUSE) puts("  - HID Mouse");
+    if (CFG_TUH_HID_GAMEPAD) puts("  - HID Gamepad");
 }

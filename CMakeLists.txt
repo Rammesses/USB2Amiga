@@ -11,8 +11,10 @@ pico_sdk_init()
 
 add_executable(usb2amiga
   src/usb2amiga.c
+  src/ami_joystick.c
   src/ami_kbd.c
   src/ami_mouse.c
+  src/usb_hid_gamepad.c
   src/usb_hid_kbd.c
   src/usb_hid_mouse.c
 )

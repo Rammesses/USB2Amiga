@@ -30,7 +30,7 @@
  extern "C" {
 #endif
 
-void ami_mouse_init(int *p_kbd_events);
+void ami_mouse_init(int *p_mouse_events);
 
 void ami_mouse_out_task(void);
 
