@@ -1,7 +1,7 @@
 /* 
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 Ha Thach (tinyusb.org)
+ * Copyright (c) 2021 Joel Hammond-Turner (github.com/Rammesses)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include <tusb.h>
+#include <class/hid/hid.h>
 
 //--------------------------------------------------------------------+
 // USB HID - Keyboard
@@ -75,32 +76,4 @@ static inline void process_kbd_report(hid_keyboard_report_t const *p_new_report)
     }
 
     prev_report = *p_new_report;
-}
-
-void usb_hid_kbd_task(void) {
-    uint8_t const addr = 1;
-
-    if (tuh_hid_keyboard_is_mounted(addr)) {
-        if (!tuh_hid_keyboard_is_busy(addr)) {
-            process_kbd_report(&usb_keyboard_report);
-            tuh_hid_keyboard_get_report(addr, &usb_keyboard_report);
-        }
-    }
-}
-
-void tuh_hid_keyboard_mounted_cb(uint8_t dev_addr) {
-    // application set-up
-    printf("A Keyboard device (address %d) is mounted\r\n", dev_addr);
-    tuh_hid_keyboard_get_report(dev_addr, &usb_keyboard_report);
-}
-
-void tuh_hid_keyboard_unmounted_cb(uint8_t dev_addr) {
-    // application tear-down
-    printf("A Keyboard device (address %d) is unmounted\r\n", dev_addr);
-}
-
-// invoked ISR context
-void tuh_hid_keyboard_isr(uint8_t dev_addr, xfer_result_t event) {
-    (void) dev_addr;
-    (void) event;
 }

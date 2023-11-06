@@ -1,7 +1,7 @@
 /* 
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 Ha Thach (tinyusb.org)
+ * Copyright (c) 2021 Joel Hammond-Turner (github.com/Rammesses)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "tusb.h"
-#include "bsp/ansi_escape.h"
+#include <tusb.h>
+#include <class/hid/hid.h>
+#include <bsp/ansi_escape.h>
 
 //--------------------------------------------------------------------+
 // USB HID - Mouse
@@ -64,7 +65,7 @@ void cursor_movement(int8_t x, int8_t y, int8_t wheel) {
     }
 }
 
-void process_mouse_report(hid_mouse_report_t const *p_report) {
+static inline void process_mouse_report(hid_mouse_report_t const *p_report) {
     static hid_mouse_report_t prev_report = {0};
 
     //------------- button state  -------------//
@@ -78,31 +79,4 @@ void process_mouse_report(hid_mouse_report_t const *p_report) {
 
     //------------- cursor movement -------------//
     cursor_movement(p_report->x, p_report->y, p_report->wheel);
-}
-
-void usb_hid_mouse_task(void) {
-    uint8_t const addr = 1;
-
-    if (tuh_hid_mouse_is_mounted(addr)) {
-        if (!tuh_hid_mouse_is_busy(addr)) {
-            process_mouse_report(&usb_mouse_report);
-            tuh_hid_mouse_get_report(addr, &usb_mouse_report);
-        }
-    }
-}
-
-void tuh_hid_mouse_mounted_cb(uint8_t dev_addr) {
-    // application set-up
-    printf("A Mouse device (address %d) is mounted\r\n", dev_addr);
-}
-
-void tuh_hid_mouse_unmounted_cb(uint8_t dev_addr) {
-    // application tear-down
-    printf("A Mouse device (address %d) is unmounted\r\n", dev_addr);
-}
-
-// invoked ISR context
-void tuh_hid_mouse_isr(uint8_t dev_addr, xfer_result_t event) {
-    (void) dev_addr;
-    (void) event;
 }

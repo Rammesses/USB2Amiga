@@ -26,11 +26,13 @@
 #ifndef _USB_HID_MOUSE_H_
 #define _USB_HID_MOUSE_H_
 
+#include <class/hid/hid.h>
+
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-void usb_hid_mouse_task(void);
+void process_mouse_report(hid_mouse_report_t const *p_report);
 
 #ifdef __cplusplus
  }

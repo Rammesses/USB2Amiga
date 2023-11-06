@@ -26,11 +26,13 @@
 #ifndef _USB_HID_KBD_H_
 #define _USB_HID_KBD_H_
 
+#include <class/hid/hid.h>
+
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-void usb_hid_kbd_task(void);
+void process_kbd_report(hid_keyboard_report_t const *p_new_report);
 
 #ifdef __cplusplus
  }

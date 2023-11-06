@@ -26,11 +26,13 @@
 #ifndef _USB_HID_GAMEPAD_H_
 #define _USB_HID_GAMEPAD_H_
 
+#include <class/hid/hid.h>
+
 #ifdef __cplusplus
  extern "C" {
 #endif
 
-void usb_hid_gamepad_task(void);
+void process_gamepad_report(hid_gamepad_report_t const *p_new_report);
 
 #ifdef __cplusplus
  }

@@ -52,12 +52,11 @@ static int p_mouse_events;
 int main(void) {
     board_init();
     print_greeting();
-
     tusb_init();
 
     ami_joystick_init(&p_joystick_events);
     ami_kbd_init(&p_kbd_events);
-    ami_kbd_init(&p_mouse_events);
+    ami_mouse_init(&p_mouse_events);
 
     // start our two loop processes
     multicore_launch_core1(core1_output_loop);
@@ -71,15 +70,6 @@ void core0_input_loop(void)
     while (1) {
         // tinyusb host task
         tuh_task();
-
-        // keyboard event handling
-        usb_hid_kbd_task();
-
-        // mouse event handling
-        usb_hid_mouse_task();
-
-        // gamepad / joystick handling
-        usb_hid_gamepad_task();
     }
 }
 
@@ -115,8 +105,11 @@ void led_blinking_task(void) {
 }
 
 void print_greeting(void) {
-    printf("This Host demo is configured to support:\n");
-    if (CFG_TUH_HID_KEYBOARD) puts("  - HID Keyboard");
-    if (CFG_TUH_HID_MOUSE) puts("  - HID Mouse");
-    if (CFG_TUH_HID_GAMEPAD) puts("  - HID Gamepad");
+    printf("AmiUSB vMAJ.MIN\n======\n  The flexible USB keyboard, mouse & gamepad interface\n\n");
+    printf("AmiUSB - Copyright (c) 2021 Joel Hammond-Turner (github.com/Rammesses/AmiUSB)\n");
+    printf("TinyUSB - Copyright (c) 2019 Ha Thach (tinyusb.org)\n");
+    printf("\nBuild MAJ.MIN.PCH.BLD - configured for:\n");
+    if (CFG_TUH_HID_KEYBOARD) puts("  - HID Keyboard\n");
+    if (CFG_TUH_HID_MOUSE) puts("  - HID Mouse\n");
+    if (CFG_TUH_HID_GAMEPAD) puts("  - HID Gamepad\n");
 }

@@ -23,23 +23,17 @@
  *
  */
 
+#ifndef _USB_HID_MOUSE_H_
+#define _USB_HID_MOUSE_H_
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#include <tusb.h>
 #include <class/hid/hid.h>
 
-//--------------------------------------------------------------------+
-// USB HID - gamepad
-//--------------------------------------------------------------------+
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
-CFG_TUSB_MEM_SECTION static hid_gamepad_report_t usb_gamepad_report;
+#ifdef __cplusplus
+ }
+#endif
 
-static inline void process_gamepad_report(hid_gamepad_report_t const *p_new_report) {
-    static hid_gamepad_report_t prev_report = {0, 0, {0}}; // previous report to check key released
-
-    prev_report = *p_new_report;
-}
-
+#endif /* _USB_HID_MOUSE_H_ */
