@@ -1,41 +1,25 @@
-/* 
+/*
  * The MIT License (MIT)
- *
- * Copyright (c) 2021 Joel Hammond-Turner (github.com/Rammesses)
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
+ * Copyright (c) 2021 Joel Hammond-Turner
  */
 
 #ifndef _AMI_MOUSE_H_
 #define _AMI_MOUSE_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 void ami_mouse_init(int *p_mouse_events);
-
 void ami_mouse_out_task(void);
 
+/* Override the default 5500 counts/sec CIA-safe pulse rate limit. */
+void ami_mouse_set_max_pulse_rate(uint32_t counts_per_sec);
+
 #ifdef __cplusplus
- }
+}
 #endif
 
 #endif /* _AMI_MOUSE_H_ */

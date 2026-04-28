@@ -1,0 +1,27 @@
+;
+; pio_quadrature.pio — Amiga quadrature mouse output
+;
+; One state machine per axis (H and V).
+; OUT pin: the A quadrature pin only (1 pin). The B pin is driven
+; directly by Core 1 via gpio_put() before each push, since the
+; spec's GPIO assignments (H-A=6, H-B=8, V-A=7, V-B=9) are not
+; consecutive and cannot both be driven by a single PIO OUT base.
+;
+; TX FIFO word format (OSR shifts LSB-first):
+;   bit   0    — A pin value (0 or 1)
+;   bits 31:1  — delay loop count (system clock cycles minus ~4 overhead)
+;
+; Core 1 pre-computes the Gray-code A/B values and inter-step delay,
+; sets B via gpio_put(), then pushes the word. The SM applies A and
+; burns the delay, then stalls waiting for the next step.
+;
+
+.program quadrature
+
+.wrap_target
+    pull block          ; stall until Core 1 pushes a step word
+    out pins, 1         ; apply A pin value (bit 0 of OSR)
+    out x, 31           ; load delay counter (bits 31:1)
+delay_loop:
+    jmp x-- delay_loop  ; pace the pulse rate
+.wrap

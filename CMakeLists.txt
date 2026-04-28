@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 pico_sdk_init()
 
+# Generate the PIO header from the .pio source
+pico_generate_pio_header(usb2amiga ${CMAKE_CURRENT_SOURCE_DIR}/src/pio_quadrature.pio)
+
 add_executable(usb2amiga
   src/usb2amiga.c
   src/ami_joystick.c
@@ -24,6 +27,13 @@ add_executable(usb2amiga
 pico_enable_stdio_uart(usb2amiga 1)
 
 target_include_directories(usb2amiga PRIVATE src)
-target_link_libraries(usb2amiga PRIVATE pico_stdlib pico_multicore tinyusb_host tinyusb_board)
+target_link_libraries(usb2amiga PRIVATE
+  pico_stdlib
+  pico_multicore
+  tinyusb_host
+  tinyusb_board
+  hardware_pio
+  hardware_clocks
+)
 
 pico_add_extra_outputs(usb2amiga)
