@@ -57,7 +57,7 @@ int main(void) {
 
     ami_joystick_init(&p_joystick_events);
     ami_kbd_init(&p_kbd_events);
-    ami_kbd_init(&p_mouse_events);
+    ami_mouse_init(&p_mouse_events);
 
     // start our two loop processes
     multicore_launch_core1(core1_output_loop);

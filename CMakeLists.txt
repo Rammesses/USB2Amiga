@@ -17,6 +17,8 @@ add_executable(usb2amiga
   src/usb_hid_gamepad.c
   src/usb_hid_kbd.c
   src/usb_hid_mouse.c
+  src/event_queue.c
+  src/keymap.c
 )
 
 pico_enable_stdio_uart(usb2amiga 1)
