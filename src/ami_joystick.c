@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2021 Joel Hammond-Turner (github.com/Rammesses)
@@ -25,11 +25,6 @@
 
 #include "ami_joystick.h"
 
-void ami_joystick_init(int *p_joystick_events)
-{
+void ami_joystick_init(int *p_joystick_events) {}
 
-}
-
-void ami_joystick_out_task(void)
-{    
-}
+void ami_joystick_out_task(void) {}

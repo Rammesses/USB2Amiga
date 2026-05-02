@@ -16,14 +16,16 @@ static const uint8_t modifier_usb_codes[8] = {
 
 static inline bool find_key(hid_keyboard_report_t const *r, uint8_t code) {
     for (int i = 0; i < 6; i++)
-        if (r->keycode[i] == code) return true;
+        if (r->keycode[i] == code)
+            return true;
     return false;
 }
 
 static void push_key(uint8_t usb_code, bool key_down) {
     uint8_t amiga = keymap_usb_to_amiga(usb_code);
-    if (amiga == AMIGA_KEY_NONE) return;
-    kbd_event_t ev = { .amiga_keycode = amiga, .key_down = key_down };
+    if (amiga == AMIGA_KEY_NONE)
+        return;
+    kbd_event_t ev = {.amiga_keycode = amiga, .key_down = key_down};
     kbd_queue_push(&ev);
 }
 

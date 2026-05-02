@@ -28,7 +28,7 @@
 #define PIN_RESET 2u
 
 /* Timing (µs) */
-#define KCLK_HALF_US    20u
+#define KCLK_HALF_US   20u
 #define INTER_KEY_US   200u
 #define ACK_TIMEOUT_US (143u * 1000u)
 
@@ -74,9 +74,9 @@ static bool kbd_send_byte(uint8_t byte) {
     /* Shift out 8 bits, MSB first */
     for (int bit = 7; bit >= 0; bit--) {
         if (byte & (1u << bit))
-            pin_release(PIN_KDAT);  /* 1 = high */
+            pin_release(PIN_KDAT); /* 1 = high */
         else
-            pin_low(PIN_KDAT);      /* 0 = low  */
+            pin_low(PIN_KDAT); /* 0 = low  */
 
         sleep_us(KCLK_HALF_US);
         pin_low(PIN_KCLK);
@@ -96,7 +96,8 @@ static bool kbd_send_byte(uint8_t byte) {
         }
     }
     /* Wait for Amiga to release KDAT */
-    while (!pin_read(PIN_KDAT));
+    while (!pin_read(PIN_KDAT))
+        ;
 
     return true;
 }
@@ -116,12 +117,15 @@ static bool kbd_send_key(uint8_t amiga_keycode, bool key_down) {
 /* Reset warning detection                                              */
 /* ------------------------------------------------------------------ */
 
-static bool reset_keys_held[3];  /* [0]=ctrl [1]=lamiga [2]=ramiga */
+static bool reset_keys_held[3]; /* [0]=ctrl [1]=lamiga [2]=ramiga */
 
 static void update_reset_combo(uint8_t amiga_keycode, bool key_down) {
-    if      (amiga_keycode == AMIGA_CTRL)   reset_keys_held[0] = key_down;
-    else if (amiga_keycode == AMIGA_LAMIGA) reset_keys_held[1] = key_down;
-    else if (amiga_keycode == AMIGA_RAMIGA) reset_keys_held[2] = key_down;
+    if (amiga_keycode == AMIGA_CTRL)
+        reset_keys_held[0] = key_down;
+    else if (amiga_keycode == AMIGA_LAMIGA)
+        reset_keys_held[1] = key_down;
+    else if (amiga_keycode == AMIGA_RAMIGA)
+        reset_keys_held[2] = key_down;
 }
 
 static bool reset_combo_active(void) {
@@ -133,26 +137,28 @@ static bool reset_combo_active(void) {
 /* ------------------------------------------------------------------ */
 
 void ami_kbd_init(int *p_kbd_events) {
-    (void)p_kbd_events;  /* queue is global; parameter kept for API compat */
+    (void)p_kbd_events; /* queue is global; parameter kept for API compat */
 
     /* Initialise GPIOs as inputs (released / high-Z) initially */
     gpio_init(PIN_KCLK);
     gpio_init(PIN_KDAT);
     gpio_init(PIN_RESET);
 
-    gpio_set_dir(PIN_KCLK,  GPIO_IN);
-    gpio_set_dir(PIN_KDAT,  GPIO_IN);
+    gpio_set_dir(PIN_KCLK, GPIO_IN);
+    gpio_set_dir(PIN_KDAT, GPIO_IN);
     gpio_set_dir(PIN_RESET, GPIO_IN);
     gpio_pull_up(PIN_RESET);
 
     /* Power-up handshake: wait for KCLK high, then send sync byte */
-    while (!gpio_get(PIN_KCLK));  /* wait for Amiga to release clock */
+    while (!gpio_get(PIN_KCLK))
+        ; /* wait for Amiga to release clock */
     kbd_send_byte(AMIGA_SYNC_BYTE);
 }
 
 void ami_kbd_out_task(void) {
     kbd_event_t ev;
-    if (!kbd_queue_pop(&ev)) return;
+    if (!kbd_queue_pop(&ev))
+        return;
 
     update_reset_combo(ev.amiga_keycode, ev.key_down);
 

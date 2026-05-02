@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2021 Joel Hammond-Turner (github.com/Rammesses)
@@ -27,7 +27,7 @@
 #define _AMI_KBD_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 void ami_kbd_init(int *p_kbd_events);
@@ -35,7 +35,7 @@ void ami_kbd_init(int *p_kbd_events);
 void ami_kbd_out_task(void);
 
 #ifdef __cplusplus
- }
+}
 #endif
 
 #endif /* _TUSB_H_ */

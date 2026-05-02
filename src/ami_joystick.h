@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2021 Joel Hammond-Turner (github.com/Rammesses)
@@ -27,7 +27,7 @@
 #define _AMI_JOYSTICK_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 void ami_joystick_init(int *p_joystick_events);
@@ -35,7 +35,7 @@ void ami_joystick_init(int *p_joystick_events);
 void ami_joystick_out_task(void);
 
 #ifdef __cplusplus
- }
+}
 #endif
 
 #endif /* _AMI_JOYSTICK_H_ */

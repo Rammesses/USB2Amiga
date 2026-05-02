@@ -1,0 +1,11 @@
+# cppcheck configuration for USB2Amiga
+# Used by the pre-commit hook and CI
+
+--enable=warning,style,performance,portability
+--std=c11
+--platform=arm32-wchar_t2
+--suppress=missingIncludeSystem
+--suppress=unusedFunction
+--inline-suppr
+--error-exitcode=1
+--quiet

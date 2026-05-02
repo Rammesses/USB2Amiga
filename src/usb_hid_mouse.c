@@ -12,10 +12,10 @@ static void process_mouse_report(hid_mouse_report_t const *r) {
 
     if (r->x || r->y || r->wheel || (r->buttons != prev.buttons)) {
         mouse_event_t ev = {
-            .dx      = r->x,
-            .dy      = r->y,
+            .dx = r->x,
+            .dy = r->y,
             .buttons = r->buttons,
-            .wheel   = r->wheel,
+            .wheel = r->wheel,
         };
         mouse_queue_push(&ev);
     }

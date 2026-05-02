@@ -14,10 +14,10 @@
 /* ------------------------------------------------------------------ */
 /* GPIO assignments                                                     */
 /* ------------------------------------------------------------------ */
-#define GPIO_H_A        6   /* Horizontal quadrature A                 */
-#define GPIO_H_B        8   /* Horizontal quadrature B — NOT consecutive*/
-#define GPIO_V_A        7   /* Vertical quadrature A                   */
-#define GPIO_V_B        9   /* Vertical quadrature B — NOT consecutive */
+#define GPIO_H_A       6 /* Horizontal quadrature A                 */
+#define GPIO_H_B       8 /* Horizontal quadrature B — NOT consecutive*/
+#define GPIO_V_A       7 /* Vertical quadrature A                   */
+#define GPIO_V_B       9 /* Vertical quadrature B — NOT consecutive */
 #define GPIO_BTN_MID   10
 #define GPIO_BTN_LEFT  11
 #define GPIO_BTN_RIGHT 12
@@ -49,15 +49,15 @@
 /* phase: 0..3, forward = increment, backward = decrement (mod 4)      */
 /* entry: { A, B }                                                      */
 /* ------------------------------------------------------------------ */
-static const uint8_t QUAD_A[4] = { 1, 1, 0, 0 };
-static const uint8_t QUAD_B[4] = { 0, 1, 1, 0 };
+static const uint8_t QUAD_A[4] = {1, 1, 0, 0};
+static const uint8_t QUAD_B[4] = {0, 1, 1, 0};
 
 /* ------------------------------------------------------------------ */
 /* PIO state                                                            */
 /* ------------------------------------------------------------------ */
-static PIO  pio_inst;
-static uint sm_h;       /* horizontal axis state machine               */
-static uint sm_v;       /* vertical axis state machine                 */
+static PIO pio_inst;
+static uint sm_h; /* horizontal axis state machine               */
+static uint sm_v; /* vertical axis state machine                 */
 static uint pio_offset;
 
 /* Current quadrature phase for each axis */
@@ -79,10 +79,8 @@ static uint32_t max_pulse_rate = 5500;
  * delay_cycles: number of system clock cycles for the step period.
  * The PIO loop burns (delay_cycles - 4) iterations (4 cycles overhead).
  */
-static void push_step(uint sm, uint gpio_a, uint gpio_b,
-                      uint8_t a_val, uint8_t b_val,
-                      uint32_t delay_cycles)
-{
+static void push_step(uint sm, uint gpio_a, uint gpio_b, uint8_t a_val, uint8_t b_val,
+                      uint32_t delay_cycles) {
     gpio_put(gpio_b, b_val);
 
     /* Word: bit 0 = A value, bits 31:1 = delay count */
@@ -95,28 +93,37 @@ static void push_step(uint sm, uint gpio_a, uint gpio_b,
 /* Public API                                                           */
 /* ------------------------------------------------------------------ */
 
-void ami_mouse_init(int *p_mouse_events)
-{
-    (void)p_mouse_events;   /* legacy parameter, unused */
+void ami_mouse_init(int *p_mouse_events) {
+    (void)p_mouse_events; /* legacy parameter, unused */
 
     /* Button GPIOs — output, active low, default high (released) */
-    gpio_init(GPIO_BTN_LEFT);  gpio_set_dir(GPIO_BTN_LEFT,  GPIO_OUT); gpio_put(GPIO_BTN_LEFT,  1);
-    gpio_init(GPIO_BTN_RIGHT); gpio_set_dir(GPIO_BTN_RIGHT, GPIO_OUT); gpio_put(GPIO_BTN_RIGHT, 1);
-    gpio_init(GPIO_BTN_MID);   gpio_set_dir(GPIO_BTN_MID,   GPIO_OUT); gpio_put(GPIO_BTN_MID,   1);
+    gpio_init(GPIO_BTN_LEFT);
+    gpio_set_dir(GPIO_BTN_LEFT, GPIO_OUT);
+    gpio_put(GPIO_BTN_LEFT, 1);
+    gpio_init(GPIO_BTN_RIGHT);
+    gpio_set_dir(GPIO_BTN_RIGHT, GPIO_OUT);
+    gpio_put(GPIO_BTN_RIGHT, 1);
+    gpio_init(GPIO_BTN_MID);
+    gpio_set_dir(GPIO_BTN_MID, GPIO_OUT);
+    gpio_put(GPIO_BTN_MID, 1);
 
     /* B pins driven directly — init as GPIO output */
-    gpio_init(GPIO_H_B); gpio_set_dir(GPIO_H_B, GPIO_OUT); gpio_put(GPIO_H_B, QUAD_B[phase_h]);
-    gpio_init(GPIO_V_B); gpio_set_dir(GPIO_V_B, GPIO_OUT); gpio_put(GPIO_V_B, QUAD_B[phase_v]);
+    gpio_init(GPIO_H_B);
+    gpio_set_dir(GPIO_H_B, GPIO_OUT);
+    gpio_put(GPIO_H_B, QUAD_B[phase_h]);
+    gpio_init(GPIO_V_B);
+    gpio_set_dir(GPIO_V_B, GPIO_OUT);
+    gpio_put(GPIO_V_B, QUAD_B[phase_v]);
 
     /* Load PIO program */
-    pio_inst   = pio0;
+    pio_inst = pio0;
     pio_offset = pio_add_program(pio_inst, &quadrature_program);
 
     /* Horizontal SM — OUT base = GPIO_H_A, 1 OUT pin */
     sm_h = pio_claim_unused_sm(pio_inst, true);
     pio_sm_config cfg_h = quadrature_program_get_default_config(pio_offset);
     sm_config_set_out_pins(&cfg_h, GPIO_H_A, 1);
-    sm_config_set_out_shift(&cfg_h, true, false, 32);  /* LSB-first, no autopull */
+    sm_config_set_out_shift(&cfg_h, true, false, 32); /* LSB-first, no autopull */
     pio_gpio_init(pio_inst, GPIO_H_A);
     pio_sm_set_consecutive_pindirs(pio_inst, sm_h, GPIO_H_A, 1, true);
     pio_sm_init(pio_inst, sm_h, pio_offset, &cfg_h);
@@ -127,7 +134,7 @@ void ami_mouse_init(int *p_mouse_events)
     sm_v = pio_claim_unused_sm(pio_inst, true);
     pio_sm_config cfg_v = quadrature_program_get_default_config(pio_offset);
     sm_config_set_out_pins(&cfg_v, GPIO_V_A, 1);
-    sm_config_set_out_shift(&cfg_v, true, false, 32);  /* LSB-first, no autopull */
+    sm_config_set_out_shift(&cfg_v, true, false, 32); /* LSB-first, no autopull */
     pio_gpio_init(pio_inst, GPIO_V_A);
     pio_sm_set_consecutive_pindirs(pio_inst, sm_v, GPIO_V_A, 1, true);
     pio_sm_init(pio_inst, sm_v, pio_offset, &cfg_v);
@@ -135,22 +142,20 @@ void ami_mouse_init(int *p_mouse_events)
     pio_sm_set_enabled(pio_inst, sm_v, true);
 }
 
-void ami_mouse_set_max_pulse_rate(uint32_t counts_per_sec)
-{
+void ami_mouse_set_max_pulse_rate(uint32_t counts_per_sec) {
     if (counts_per_sec > 0 && counts_per_sec <= 6000)
         max_pulse_rate = counts_per_sec;
 }
 
-void ami_mouse_out_task(void)
-{
+void ami_mouse_out_task(void) {
     mouse_event_t ev;
     if (!mouse_queue_pop(&ev))
         return;
 
     /* Button outputs — active low */
-    gpio_put(GPIO_BTN_LEFT,  (ev.buttons & 0x01) ? 0 : 1);
+    gpio_put(GPIO_BTN_LEFT, (ev.buttons & 0x01) ? 0 : 1);
     gpio_put(GPIO_BTN_RIGHT, (ev.buttons & 0x02) ? 0 : 1);
-    gpio_put(GPIO_BTN_MID,   (ev.buttons & 0x04) ? 0 : 1);
+    gpio_put(GPIO_BTN_MID, (ev.buttons & 0x04) ? 0 : 1);
 
     if (ev.dx == 0 && ev.dy == 0)
         return;
@@ -168,22 +173,20 @@ void ami_mouse_out_task(void)
      * than sequential (L-shaped). Both FIFOs are filled in lockstep;
      * since each SM runs independently, they execute in parallel.
      */
-    int dir_h  = (ev.dx >= 0) ? 1 : -1;
+    int dir_h = (ev.dx >= 0) ? 1 : -1;
     int steps_h = (ev.dx >= 0) ? ev.dx : -ev.dx;
-    int dir_v  = (ev.dy >= 0) ? 1 : -1;
+    int dir_v = (ev.dy >= 0) ? 1 : -1;
     int steps_v = (ev.dy >= 0) ? ev.dy : -ev.dy;
-    int total   = (steps_h > steps_v) ? steps_h : steps_v;
+    int total = (steps_h > steps_v) ? steps_h : steps_v;
 
     for (int i = 0; i < total; i++) {
         if (i < steps_h) {
             phase_h = (phase_h + 4 + dir_h) & 3;
-            push_step(sm_h, GPIO_H_A, GPIO_H_B,
-                      QUAD_A[phase_h], QUAD_B[phase_h], step_cycles);
+            push_step(sm_h, GPIO_H_A, GPIO_H_B, QUAD_A[phase_h], QUAD_B[phase_h], step_cycles);
         }
         if (i < steps_v) {
             phase_v = (phase_v + 4 + dir_v) & 3;
-            push_step(sm_v, GPIO_V_A, GPIO_V_B,
-                      QUAD_A[phase_v], QUAD_B[phase_v], step_cycles);
+            push_step(sm_v, GPIO_V_A, GPIO_V_B, QUAD_A[phase_v], QUAD_B[phase_v], step_cycles);
         }
     }
 }

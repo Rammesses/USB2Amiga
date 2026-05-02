@@ -24,7 +24,8 @@ static void led_blinking_task(void) {
     const uint32_t interval_ms = 250;
     static uint32_t start_ms = 0;
     static bool led_state = false;
-    if (board_millis() - start_ms < interval_ms) return;
+    if (board_millis() - start_ms < interval_ms)
+        return;
     start_ms += interval_ms;
     board_led_write(led_state);
     led_state = !led_state;
@@ -43,7 +44,8 @@ int main(void) {
     board_init();
 
     printf("USB2Amiga starting\r\n");
-    if (CFG_TUH_HID)   puts("  - HID (keyboard/mouse/gamepad)");
+    if (CFG_TUH_HID)
+        puts("  - HID (keyboard/mouse/gamepad)");
 
     tusb_init();
 
@@ -62,13 +64,14 @@ int main(void) {
 /* TinyUSB 1.x unified HID host callbacks                              */
 /* ------------------------------------------------------------------ */
 
-void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance,
-                      uint8_t const *desc_report, uint16_t desc_len)
-{
-    (void)desc_report; (void)desc_len;
+void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const *desc_report,
+                      uint16_t desc_len) {
+    (void)desc_report;
+    (void)desc_len;
     uint8_t proto = tuh_hid_interface_protocol(dev_addr, instance);
-    const char *name = (proto == HID_ITF_PROTOCOL_KEYBOARD) ? "keyboard" :
-                       (proto == HID_ITF_PROTOCOL_MOUSE)    ? "mouse"    : "HID";
+    const char *name = (proto == HID_ITF_PROTOCOL_KEYBOARD) ? "keyboard"
+                       : (proto == HID_ITF_PROTOCOL_MOUSE)  ? "mouse"
+                                                            : "HID";
     printf("%s mounted (addr %d inst %d)\r\n", name, dev_addr, instance);
 
     /* Request first report */
@@ -79,14 +82,19 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
     printf("HID unmounted (addr %d inst %d)\r\n", dev_addr, instance);
 }
 
-void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
-                                 uint8_t const *report, uint16_t len)
-{
+void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const *report,
+                                uint16_t len) {
     uint8_t proto = tuh_hid_interface_protocol(dev_addr, instance);
     switch (proto) {
-        case HID_ITF_PROTOCOL_KEYBOARD: usb_hid_kbd_report(report, len);     break;
-        case HID_ITF_PROTOCOL_MOUSE:    usb_hid_mouse_report(report, len);   break;
-        default:                        usb_hid_gamepad_report(report, len); break;
+    case HID_ITF_PROTOCOL_KEYBOARD:
+        usb_hid_kbd_report(report, len);
+        break;
+    case HID_ITF_PROTOCOL_MOUSE:
+        usb_hid_mouse_report(report, len);
+        break;
+    default:
+        usb_hid_gamepad_report(report, len);
+        break;
     }
     /* Re-arm for next report */
     tuh_hid_receive_report(dev_addr, instance);
