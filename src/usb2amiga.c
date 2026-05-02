@@ -1,32 +1,10 @@
-/* 
+/*
  * The MIT License (MIT)
- *
  * Copyright (c) 2019 Ha Thach (tinyusb.org)
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
+ * Copyright (c) 2021 Joel Hammond-Turner
  */
 
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-
 #include "bsp/board.h"
 #include "pico/multicore.h"
 #include "tusb.h"
@@ -38,20 +16,34 @@
 #include "usb_hid_kbd.h"
 #include "usb_hid_mouse.h"
 
-void print_greeting(void);
-void led_blinking_task(void);
-void core0_input_loop(void);
-void core1_output_loop(void);
-
-extern void hid_task(void);
-
 static int p_joystick_events;
 static int p_kbd_events;
 static int p_mouse_events;
 
+static void led_blinking_task(void) {
+    const uint32_t interval_ms = 250;
+    static uint32_t start_ms = 0;
+    static bool led_state = false;
+    if (board_millis() - start_ms < interval_ms) return;
+    start_ms += interval_ms;
+    board_led_write(led_state);
+    led_state = !led_state;
+}
+
+static void core1_output_loop(void) {
+    while (1) {
+        ami_kbd_out_task();
+        ami_mouse_out_task();
+        ami_joystick_out_task();
+        led_blinking_task();
+    }
+}
+
 int main(void) {
     board_init();
-    print_greeting();
+
+    printf("USB2Amiga starting\r\n");
+    if (CFG_TUH_HID)   puts("  - HID (keyboard/mouse/gamepad)");
 
     tusb_init();
 
@@ -59,64 +51,43 @@ int main(void) {
     ami_kbd_init(&p_kbd_events);
     ami_mouse_init(&p_mouse_events);
 
-    // start our two loop processes
     multicore_launch_core1(core1_output_loop);
-    core0_input_loop();
 
-    return 0;
-}
-
-void core0_input_loop(void)
-{
     while (1) {
-        // tinyusb host task
         tuh_task();
-
-        // keyboard event handling
-        usb_hid_kbd_task();
-
-        // mouse event handling
-        usb_hid_mouse_task();
-
-        // gamepad / joystick handling
-        usb_hid_gamepad_task();
     }
 }
 
-void core1_output_loop(void)
+/* ------------------------------------------------------------------ */
+/* TinyUSB 1.x unified HID host callbacks                              */
+/* ------------------------------------------------------------------ */
+
+void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance,
+                      uint8_t const *desc_report, uint16_t desc_len)
 {
-    while (1) {
-        // keyboard event handling
-        ami_kbd_out_task();
+    (void)desc_report; (void)desc_len;
+    uint8_t proto = tuh_hid_interface_protocol(dev_addr, instance);
+    const char *name = (proto == HID_ITF_PROTOCOL_KEYBOARD) ? "keyboard" :
+                       (proto == HID_ITF_PROTOCOL_MOUSE)    ? "mouse"    : "HID";
+    printf("%s mounted (addr %d inst %d)\r\n", name, dev_addr, instance);
 
-        // mouse event handling
-        ami_mouse_out_task();
+    /* Request first report */
+    tuh_hid_receive_report(dev_addr, instance);
+}
 
-        // gamepad / joystick handling
-        ami_joystick_out_task();
+void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance) {
+    printf("HID unmounted (addr %d inst %d)\r\n", dev_addr, instance);
+}
 
-        // watchdog blink         
-        led_blinking_task();
+void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
+                                 uint8_t const *report, uint16_t len)
+{
+    uint8_t proto = tuh_hid_interface_protocol(dev_addr, instance);
+    switch (proto) {
+        case HID_ITF_PROTOCOL_KEYBOARD: usb_hid_kbd_report(report, len);     break;
+        case HID_ITF_PROTOCOL_MOUSE:    usb_hid_mouse_report(report, len);   break;
+        default:                        usb_hid_gamepad_report(report, len); break;
     }
-}
-
-void led_blinking_task(void) {
-    const uint32_t interval_ms = 250;
-    static uint32_t start_ms = 0;
-
-    static bool led_state = false;
-
-    // Blink every interval ms
-    if (board_millis() - start_ms < interval_ms) return; // not enough time
-    start_ms += interval_ms;
-
-    board_led_write(led_state);
-    led_state = 1 - led_state; // toggle
-}
-
-void print_greeting(void) {
-    printf("This Host demo is configured to support:\n");
-    if (CFG_TUH_HID_KEYBOARD) puts("  - HID Keyboard");
-    if (CFG_TUH_HID_MOUSE) puts("  - HID Mouse");
-    if (CFG_TUH_HID_GAMEPAD) puts("  - HID Gamepad");
+    /* Re-arm for next report */
+    tuh_hid_receive_report(dev_addr, instance);
 }

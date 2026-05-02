@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "hardware/sync.h"
 
 #ifdef __cplusplus
 extern "C" {
